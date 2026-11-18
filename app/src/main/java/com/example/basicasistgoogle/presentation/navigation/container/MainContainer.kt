@@ -1,0 +1,65 @@
+package com.example.basicasistgoogle.presentation.navigation.container
+
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
+import com.example.basicasistgoogle.presentation.component.AppBottomBar
+import com.example.basicasistgoogle.presentation.screen.mainContainer.main.MainScreen
+import com.example.basicasistgoogle.presentation.screen.mainContainer.profile.ProfileScreen
+import com.example.basicasistgoogle.presentation.screen.mainContainer.settings.SettingScreen
+
+@Composable
+fun MainContainer() {
+
+    val navController = rememberNavController()
+
+    val navBackStackEntry = navController.currentBackStackEntryAsState()
+
+    val currentRoute = navBackStackEntry.value?.destination?.route
+    Scaffold(
+        bottomBar = {
+            AppBottomBar(
+                currentRoute = currentRoute,
+                onNavigate = { route ->
+                    navController.navigate(route) {
+                        launchSingleTop = true
+                        restoreState = true
+                        popUpTo(navController.graph.startDestinationId) {
+                            saveState = true
+                        }
+                    }
+                },
+            )
+        }
+    ) { paddingFromScaffold ->
+        NavHost(
+            navController = navController,
+            startDestination = "home",
+            modifier = Modifier.padding(paddingFromScaffold) 
+        ) {
+
+            composable("home") {
+                MainScreen(
+                    bottomPadding = paddingFromScaffold.calculateBottomPadding(),
+                )
+            }
+            composable("profile") {
+                ProfileScreen(
+                    navigateBack = { navController.popBackStack() }
+                )
+            }
+            composable("settings") {
+                SettingScreen(
+                    navigateBack = { navController.popBackStack() }
+                )
+            }
+        }
+    }
+}
